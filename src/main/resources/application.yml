@@ -1,6 +1,6 @@
 spring:
   profiles:
-    include: secret
+    include: security
 
   jpa:
     hibernate:
