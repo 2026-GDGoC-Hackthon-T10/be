@@ -71,6 +71,7 @@ public class GameService {
 
     /**
      * 2. 스테이지별 문제 추출 (6개)
+     * 수정: CODE_SELECT 타입일 경우 contextText를 줄 단위로 쪼개어 codeLines로 전달합니다.
      */
     public List<Map<String, Object>> getQuestionsByStage(Integer stage, HttpSession session) {
         UserProgress user = getOrCreateUser(session.getId());
@@ -88,7 +89,19 @@ public class GameService {
                     map.put("questionId", q.getQuestionId());
                     map.put("questionText", q.getQuestionText());
                     map.put("questionType", q.getQuestionType());
-                    map.put("contextText", q.getContextText());
+
+                    // --- [추가] 코드 선택형(CODE_SELECT) 처리 로직 ---
+                    if ("CODE_SELECT".equals(q.getQuestionType()) && q.getContextText() != null) {
+                        // 줄바꿈(\n) 기준으로 잘라 배열로 전달 (FE에서 한 줄씩 클릭 가능하게 함)
+                        map.put("codeLines", q.getContextText().split("\n"));
+                        map.put("contextText", null);
+                    } else {
+                        // 일반 문제일 경우 기존 텍스트 방식 유지
+                        map.put("codeLines", null);
+                        map.put("contextText", q.getContextText());
+                    }
+                    // ------------------------------------------
+
                     map.put("options", q.getAnswers().stream()
                             .map(Answer::getOptionText)
                             .collect(Collectors.toList()));

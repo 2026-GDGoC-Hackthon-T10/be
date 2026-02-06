@@ -36,8 +36,13 @@ public class QuizService {
         Answer correctAnswer = answerRepository.findByQuestionQuestionIdAndIsCorrectTrue(questionId)
                 .orElseThrow(() -> new IllegalStateException("해당 문제에 정답 설정이 없습니다."));
 
-        // 3. 채점
-        boolean isCorrect = correctAnswer.getOptionText().equals(selectedOption);
+        // 3. 채점 (수정됨: trim()과 equalsIgnoreCase() 적용)
+        // selectedOption이 null일 경우를 대비해 null 체크 후 채점 진행
+        boolean isCorrect = false;
+        if (selectedOption != null && correctAnswer.getOptionText() != null) {
+            isCorrect = correctAnswer.getOptionText().trim()
+                    .equalsIgnoreCase(selectedOption.trim());
+        }
 
         // 4. 유저 상태 업데이트
         if (isCorrect) {
@@ -48,7 +53,6 @@ public class QuizService {
         }
 
         // [중요!] 4-1. 스테이지 내 문제 진행 번호 증가
-        // 이 로직이 있어야 6문제를 차례대로 풀고 있다는 것이 기록됩니다.
         user.setCurrentProblemIndex(user.getCurrentProblemIndex() + 1);
 
         // 5. 풀이 이력(History) 저장
