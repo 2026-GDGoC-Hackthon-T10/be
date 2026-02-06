@@ -1,12 +1,18 @@
 package com.jinanging.codeblue.service;
 
-import com.jinanging.codeblue.domain.*;
+import com.jinanging.codeblue.domain.Answer;
+import com.jinanging.codeblue.domain.Question;
+import com.jinanging.codeblue.domain.UserProgress;
+import com.jinanging.codeblue.domain.UserQuestionHistory;
 import com.jinanging.codeblue.dto.QuizResultResponse;
-import com.jinanging.codeblue.repository.*;
+import com.jinanging.codeblue.repository.AnswerRepository;
+import com.jinanging.codeblue.repository.QuestionRepository;
+import com.jinanging.codeblue.repository.UserProgressRepository;
+import com.jinanging.codeblue.repository.UserQuestionHistoryRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +47,10 @@ public class QuizService {
             user.setWrongCount(user.getWrongCount() + 1);
         }
 
+        // [중요!] 4-1. 스테이지 내 문제 진행 번호 증가
+        // 이 로직이 있어야 6문제를 차례대로 풀고 있다는 것이 기록됩니다.
+        user.setCurrentProblemIndex(user.getCurrentProblemIndex() + 1);
+
         // 5. 풀이 이력(History) 저장
         UserQuestionHistory history = UserQuestionHistory.builder()
                 .userProgress(user)
@@ -51,6 +61,9 @@ public class QuizService {
                 .build();
 
         historyRepository.save(history);
+
+        // Dirty Checking 덕분에 save를 명시하지 않아도 되지만, 명확성을 위해 추가할 수 있습니다.
+        userProgressRepository.save(user);
 
         // 6. DTO 결과 반환
         return new QuizResultResponse(

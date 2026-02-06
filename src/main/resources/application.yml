@@ -23,5 +23,10 @@ springdoc:
     path: /swagger-ui.html
     operations-sorter: alpha
     tags-sorter: alpha
+    # 추가: 서버 응답 시간 표시 및 로컬 테스트 최적화
+    display-request-duration: true
   api-docs:
     path: /api-docs
+  # 추가: Swagger가 자동으로 http/https 도메인을 판단하게 함
+  default-flat-param-object: true
+  override-with-generic-response: true
