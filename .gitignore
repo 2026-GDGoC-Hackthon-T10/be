@@ -38,5 +38,5 @@ out/
 
 
 ### Application Properties ###
-src/main/resources/application-secret.yml
+src/main/resources/application-security.yml
 
